@@ -1,6 +1,6 @@
 # Fixed game test environments
 
-All images pin Python 3.12.10 by OCI digest and install explicit Python dependency versions with `--no-deps`. `common` needs no native game package. Each adapter has an independent image and missing dependencies fail the tests. The existing required `invariants` job depends on common unit tests and all adapter matrix jobs.
+Images pin their Python base by OCI digest and install explicit Python dependency versions with `--no-deps`. TowerMind uses Python 3.10.12 for ML-Agents compatibility. See the [TowerMind adapter notes](../../benchmarks/towermind/README.md) for its offline simulator and two-container checks. `common` needs no native game package. Each adapter has an independent image and missing dependencies fail the tests. The existing required `invariants` job depends on common unit tests and all adapter matrix jobs.
 
 ```bash
 docker build -f game_first_exam/tests/envs/common.Dockerfile -t game-tests:common .

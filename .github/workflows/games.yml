@@ -25,12 +25,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        benchmark: [common, minigrid, crafter, textworld, babaisai, minihack]
+        benchmark: [common, minigrid, crafter, textworld, babaisai, minihack, towermind]
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
       - run: docker build -f game_first_exam/tests/envs/${{ matrix.benchmark }}.Dockerfile -t game-tests:${{ matrix.benchmark }} .
-      - run: docker run --rm -v "$PWD:/repo:ro" game-tests:${{ matrix.benchmark }} bash game_first_exam/tests/run.sh ${{ matrix.benchmark }}
+      - if: matrix.benchmark != 'towermind'
+        run: docker run --rm -v "$PWD:/repo:ro" game-tests:${{ matrix.benchmark }} bash game_first_exam/tests/run.sh ${{ matrix.benchmark }}
+      - if: matrix.benchmark == 'towermind'
+        run: docker run --rm --network none -v "$PWD:/repo:ro" game-tests:towermind bash game_first_exam/tests/run.sh towermind
+      - if: matrix.benchmark == 'towermind'
+        name: Check TowerMind sandbox boundary from a separate container
+        run: |
+          docker build --target client -f game_first_exam/tests/envs/towermind.Dockerfile -t game-tests:towermind-client .
+          bash game_first_exam/tests/check-towermind-network.sh
+      - if: ${{ failure() && matrix.benchmark == 'towermind' }}
+        name: Check the official Windows player under Wine
+        run: |
+          docker build --target windows-probe -f game_first_exam/tests/envs/towermind.Dockerfile -t game-tests:towermind-wine .
+          docker run --rm --init --network none -v "$PWD:/repo:ro" game-tests:towermind-wine \
+            xvfb-run -a -s "-screen 0 1400x900x24" python game_first_exam/tests/towermind_windows_probe.py
   harbor:
     runs-on: ubuntu-latest
     timeout-minutes: 15

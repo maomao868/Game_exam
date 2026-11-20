@@ -19,6 +19,10 @@ case "${1:-common}" in
     python3 game_first_exam/tests/test_minihack.py
     python3 game_first_exam/tests/test_game_modes_native.py
     ;;
+  towermind)
+    python3 game_first_exam/tests/test_towermind_contract.py
+    xvfb-run -a -s "-screen 0 1400x900x24" python3 game_first_exam/tests/test_towermind_native.py
+    ;;
   minigrid|crafter|textworld|babaisai)
     export GAME_TEST_BENCHMARK="$1"
     python3 game_first_exam/tests/test_game_adapters.py

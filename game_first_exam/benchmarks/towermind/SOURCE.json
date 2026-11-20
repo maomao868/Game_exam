@@ -1,0 +1,14 @@
+{
+  "repository": "https://github.com/tb6147877/TowerMind",
+  "commit": "7ac5d5cb815ce022cdf6f6d40fa0a9fcc9be3e71",
+  "files": {
+    "linux.zip": {
+      "path": "compressed_env/linux.zip",
+      "sha256": "153f363150f5e33f4827599498e2d7bda504045a4ae258e013bb504ea4273e19"
+    },
+    "wrappers.py": {
+      "path": "common/wrappers.py",
+      "sha256": "440eb20ac34f6fc80dcffca1938c95f49ea178b48a241c03771aae646617a15c"
+    }
+  }
+}
