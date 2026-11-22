@@ -13,6 +13,9 @@ case "${1:-common}" in
     python3 -m unittest discover -s game_first_exam/tests -p 'test_game_connection.py'
     python3 -m unittest discover -s game_first_exam/tests -p 'test_game_modes.py'
     ;;
+  overcooked)
+    python3 game_first_exam/tests/test_overcooked.py
+    ;;
   minihack)
     export GAME_TEST_BENCHMARK=minihack
     python3 game_first_exam/tests/test_game_adapters.py

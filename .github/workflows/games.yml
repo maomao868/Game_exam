@@ -25,12 +25,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        benchmark: [common, minigrid, crafter, textworld, babaisai, minihack]
+        benchmark: [common, minigrid, crafter, textworld, babaisai, minihack, overcooked]
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
       - run: docker build -f game_first_exam/tests/envs/${{ matrix.benchmark }}.Dockerfile -t game-tests:${{ matrix.benchmark }} .
-      - run: docker run --rm -v "$PWD:/repo:ro" game-tests:${{ matrix.benchmark }} bash game_first_exam/tests/run.sh ${{ matrix.benchmark }}
+      - run: docker run --rm ${{ matrix.benchmark == 'overcooked' && '--network none' || '' }} -v "$PWD:/repo:ro" game-tests:${{ matrix.benchmark }} bash game_first_exam/tests/run.sh ${{ matrix.benchmark }}
+      - if: matrix.benchmark == 'overcooked'
+        name: Verify the isolated kitchen client and simulator
+        run: |
+          docker build --target client -f game_first_exam/tests/envs/overcooked.Dockerfile -t game-tests:overcooked-client .
+          bash game_first_exam/tests/check-overcooked-network.sh
   harbor:
     runs-on: ubuntu-latest
     timeout-minutes: 15

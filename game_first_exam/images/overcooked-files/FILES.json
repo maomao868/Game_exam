@@ -1,0 +1,10 @@
+{
+  "image": "ghcr.io/mll-lab-nu/efe:overcooked-files-0.1.0@sha256:2491a17a6d67713e65de138b98bf1fc51784f73aff98aab9157f1df3cb73b9f4",
+  "source": "game_first_exam/benchmarks/overcooked",
+  "files": {
+    "adapter.py": "5085a089553ecb6bb12190f7a01d8f67c3d415f98afb9a5dc6b719b4c03fa01a",
+    "instance_schema.py": "85b229d5838dbdf26e32b86a4a33aa880b9cde255cc66f5bfe3bfaaface4072a",
+    "metric_rules.py": "6fe1d44c12f368755488fde8c00f64c7c119598d23ba0e1b45a85ed8df90a4f9",
+    "requirements.txt": "1ce802838005ca28623271203e5ddf2b3b3f833f58678e7a495329b3eb5ab1ce"
+  }
+}

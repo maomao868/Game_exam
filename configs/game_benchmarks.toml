@@ -14,3 +14,6 @@ schema = "game_first_exam/benchmarks/babaisai/instance_schema.py"
 
 [benchmarks.minihack]
 schema = "game_first_exam/benchmarks/minihack/instance_schema.py"
+
+[benchmarks.overcooked]
+schema = "game_first_exam/benchmarks/overcooked/instance_schema.py"

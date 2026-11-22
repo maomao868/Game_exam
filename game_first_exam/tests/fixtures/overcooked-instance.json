@@ -1,0 +1,19 @@
+{
+  "schema_version": "game-instance/2.2",
+  "protocol": "game-standard/2.2",
+  "adapter_version": "1.0.0",
+  "benchmark": "overcooked",
+  "family": "development",
+  "env_id": "asymmetric_advantages",
+  "source_commit": "739950a079cdaed5a44fcc662efc40244c205d06",
+  "engine_versions": {"overcooked-ai": "2.0.0", "numpy": "1.26.4", "scipy": "1.15.3", "pygame": "2.6.1"},
+  "seed": 42,
+  "player_index": 0,
+  "partner": "GreedyHumanModel",
+  "horizon": 400,
+  "max_steps": null,
+  "observation_profile": "kitchen-rgb-v1",
+  "capabilities": {"images": true, "action_mode": "enum", "timing": "action-stepped", "native_truncation": true},
+  "metric_spec": {"primary": "native_return", "reducer": "family_macro", "reducer_version": "1.0.0", "success_label": "episode_completed"},
+  "initial_state_sha256": "9d503707259ce3dda13d9140faa845e84c60cdb2293f09f5eac3a3c56a4f0d8c"
+}

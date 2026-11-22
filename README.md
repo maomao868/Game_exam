@@ -24,7 +24,7 @@ Game Exam 基于 [Embodied First Exam](https://github.com/mll-lab-nu/embodied-fi
 
 ## 已接入的游戏
 
-当前共有 **5 个 benchmark、42 个 standard 任务配置，另外有 1 个 privileged 和 1 个 realtime 配置，共 44 个任务目录**。同一原生任务的不同模式单独计数。
+当前有 6 个已注册的 benchmark。其中 5 个提供正式任务，共有 **42 个 standard、1 个 privileged 和 1 个 realtime 配置**。Overcooked-AI 目前提供一个开发实例，可单独运行原生对照测试。[Overcooked-AI 接入与运行说明](game_first_exam/benchmarks/overcooked/README.md)
 
 | Benchmark | standard | 其他模式 | 主要内容 | 说明 |
 |---|---:|---|---|---|

@@ -31,13 +31,15 @@ from test_games_runner import record, trial
 class ConfigTests(unittest.TestCase):
     def test_each_bundled_schema_works_without_repo_or_engine_packages(self):
         for benchmark, schema in schema_paths().items():
-            task = next(p for p in sorted((ROOT / 'game_first_exam/tasks' / benchmark).glob('*-standard')) if '-i00-' not in p.name)
+            tasks = sorted((ROOT / 'game_first_exam/tasks' / benchmark).glob('*-standard'))
+            sample = next((p / 'tests/instance.json' for p in tasks if '-i00-' not in p.name),
+                          ROOT / 'game_first_exam/tests/fixtures' / f'{benchmark}-instance.json')
             with self.subTest(benchmark=benchmark), tempfile.TemporaryDirectory() as tmp:
                 out = Path(tmp)
                 for name in ('config_schema.py', 'reducers.py'):
                     shutil.copyfile(ROOT / 'game_first_exam/runtime' / name, out / name)
                 shutil.copyfile(schema, out / 'instance_schema.py')
-                shutil.copyfile(task / 'tests/instance.json', out / 'instance.json')
+                shutil.copyfile(sample, out / 'instance.json')
                 program = '''import json, sys
 sys.path.insert(0, '.')
 from config_schema import validate_instance
