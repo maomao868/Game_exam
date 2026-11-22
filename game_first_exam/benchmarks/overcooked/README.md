@@ -18,4 +18,12 @@ docker build --target client -f game_first_exam/tests/envs/overcooked.Dockerfile
 bash game_first_exam/tests/check-overcooked-network.sh
 ```
 
+在已安装本项目的 Harbor 0.23.0 环境中，复用上面构建的两个镜像，可运行开发实例的隔离验收。Oracle 通过内部网络执行一个动作后退出，Harbor 停止 agent，再从 sim 封存并收集轨迹。独立 verifier 只有回环接口。Harbor 在 agent 阶段会共享可写的 `/logs/verifier`，验收检查其中的测试标记在评分前被清除，同时比对 verifier 收到的终局文件与宿主收集件的 SHA-256。
+
+```bash
+harbor run -p game_first_exam/tests/fixtures/overcooked-isolation \
+  -c configs/harbor/oracle.json --jobs-dir "$PWD/jobs" --job-name overcooked-isolation -y
+python ci_checks/check-overcooked-isolation.py jobs/overcooked-isolation
+```
+
 在安装了本目录依赖的 Python 3.10 环境里，也可直接执行 `python game_first_exam/tests/test_overcooked.py -v`。首次启动会在模拟器的原版包目录生成规划缓存，运行账户需要能写入其 `data/planners`。开发配置在 [overcooked-instance.json](../../tests/fixtures/overcooked-instance.json)。正式 exam 通过评审后单独加入任务套件。

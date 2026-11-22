@@ -1,0 +1,12 @@
+services:
+  main:
+    depends_on: [sim]
+    security_opt: [no-new-privileges:true]
+  sim:
+    image: game-tests:overcooked
+    pull_policy: never
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+networks:
+  default:
+    internal: true

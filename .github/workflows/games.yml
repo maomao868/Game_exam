@@ -36,6 +36,22 @@ jobs:
         run: |
           docker build --target client -f game_first_exam/tests/envs/overcooked.Dockerfile -t game-tests:overcooked-client .
           bash game_first_exam/tests/check-overcooked-network.sh
+      - if: matrix.benchmark == 'overcooked'
+        uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - if: matrix.benchmark == 'overcooked'
+        name: Run and verify a separate Harbor verifier for Overcooked
+        run: |
+          python -m pip install -e .
+          harbor run -p game_first_exam/tests/fixtures/overcooked-isolation \
+            -c configs/harbor/oracle.json --jobs-dir "$PWD/jobs" --job-name overcooked-isolation -y
+          python ci_checks/check-overcooked-isolation.py jobs/overcooked-isolation
+      - if: always() && matrix.benchmark == 'overcooked'
+        uses: actions/upload-artifact@v4
+        with:
+          name: overcooked-harbor-isolation
+          path: jobs/overcooked-isolation/
+          retention-days: 7
   harbor:
     runs-on: ubuntu-latest
     timeout-minutes: 15
