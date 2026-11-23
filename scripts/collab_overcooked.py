@@ -70,6 +70,8 @@ def prepare(source, dest, orders, catalog, model, smoke, images):
             for key, value in replacements.items():
                 content = content.replace(key, value)
             target.write_text(content, encoding="utf-8", newline="\n")
+            if target.suffix == ".sh":
+                target.chmod(0o755)
         (task / "tests/selection.json").write_text(json.dumps([order, model, repeats]))
         tasks.append({"path": str(task)})
     config = {"tasks": tasks, "agents": [{"name": "oracle"}], "n_attempts": 1,
@@ -111,8 +113,7 @@ def launch(root, families, include, exclude, limit, listing, args, harbor):
     argv = ["run", "-c", str(config)]
     if options.job_name:
         argv.extend(["--job-name", options.job_name])
-    if options.jobs_dir:
-        argv.extend(["--jobs-dir", str(options.jobs_dir)])
+    argv.extend(["--jobs-dir", str((options.jobs_dir or Path("jobs")).resolve())])
     if options.yes:
         argv.append("-y")
     return harbor(argv)
