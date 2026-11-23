@@ -335,6 +335,16 @@ def run(argv: list[str], app=None) -> int:
     games = _Scripts("prepare_games")
     if game_suite is None:
         game_suite = "all" if which == "all" else "core"
+    if game_suite == "collab-overcooked":
+        if modes or benches or paths or which != "core":
+            print("Collab-Overcooked uses the native two-role protocol. Select recipes with --family or -i.", file=sys.stderr)
+            return 2
+        try:
+            return _Scripts("collab_overcooked").launch(
+                find_root(), families, inc, exc, n_tasks, listing, rest, lambda args: harbor(args, app))
+        except (ValueError, OSError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
     if game_suite is not None:
         try:
             suite, plans = games.load_suite(game_suite)

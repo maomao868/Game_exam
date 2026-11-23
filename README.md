@@ -4,7 +4,7 @@
 
 Game Exam 基于 [Embodied First Exam](https://github.com/mll-lab-nu/embodied-first-exam) 的任务封装和 [Harbor](https://github.com/laude-institute/harbor) 执行方式构建。本仓库只包含游戏任务、游戏适配器和它们依赖的公共工具，不包含机器人 benchmark、网站源码、个人配置或历史评测日志。
 
-模型通过 Harbor 原生 coding agent 阅读任务的 `instruction.md`，在容器内编写并执行 Python 等程序，通过客户端操作游戏。游戏环境负责推进状态，独立 verifier 根据可信记录评分。这里没有另建直接 LLM 对话式动作入口或 RL 训练入口。
+standard 任务中的模型通过 Harbor 原生 coding agent 阅读 `instruction.md`，在容器内编写并执行程序，通过客户端操作游戏。Collab-Overcooked 使用论文的双角色协议。两类任务都由 Harbor 管理生命周期，并由独立 verifier 根据可信轨迹评分。
 
 > 当前是开发与接入验证版本。冻结任务是已确定环境、实例、seed、观测方式和预算的可复现配置，不等于 benchmark 的全部任务，也不是新的官方排行榜。网站源码在单独的私人仓库维护。
 
@@ -24,7 +24,7 @@ Game Exam 基于 [Embodied First Exam](https://github.com/mll-lab-nu/embodied-fi
 
 ## 已接入的游戏
 
-当前有 6 个已注册的 benchmark。其中 5 个提供正式任务，共有 **42 个 standard、1 个 privileged 和 1 个 realtime 配置**。Overcooked-AI 目前提供一个开发实例，可单独运行原生对照测试。[Overcooked-AI 接入与运行说明](game_first_exam/benchmarks/overcooked/README.md)
+当前接入 7 个 benchmark。5 个提供项目冻结任务，共有 **42 个 standard、1 个 privileged 和 1 个 realtime 配置**。Collab-Overcooked 提供独立的原生双角色套件，覆盖论文的 30 道菜。用 `harbor run --game-suite collab-overcooked --list` 查看任务。Overcooked-AI 另有一个开发实例。[Collab-Overcooked 运行与隔离说明](game_first_exam/benchmarks/collab_overcooked/README.md) · [Overcooked-AI 开发实例](game_first_exam/benchmarks/overcooked/README.md)
 
 | Benchmark | standard | 其他模式 | 主要内容 | 说明 |
 |---|---:|---|---|---|

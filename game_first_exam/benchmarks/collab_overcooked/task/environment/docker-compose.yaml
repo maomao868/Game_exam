@@ -1,0 +1,35 @@
+services:
+  main:
+    network_mode: none
+    depends_on: [sim, chef, assistant]
+    volumes: ["status:/status:ro"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  sim:
+    image: SIM_IMAGE
+    pull_policy: never
+    network_mode: none
+    environment:
+      ORDER: ORDER_NAME
+      MODEL: MODEL_NAME
+      REPEATS: "EPISODES"
+    volumes: ["chef:/channels/Chef", "assistant:/channels/Assistant", "status:/status"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  chef: &role
+    image: ROLE_IMAGE
+    pull_policy: never
+    read_only: true
+    user: "65534:65534"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment: {ROLE: Chef, MODEL: MODEL_NAME}
+    volumes: ["chef:/role:ro"]
+  assistant:
+    <<: *role
+    environment: {ROLE: Assistant, MODEL: MODEL_NAME}
+    volumes: ["assistant:/role:ro"]
+volumes:
+  chef: {}
+  assistant: {}
+  status: {}

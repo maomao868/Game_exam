@@ -63,6 +63,29 @@ jobs:
       - run: python -m pip install -e .
       - run: harbor run --game-suite minihack-balrog --standard --list
       - run: python game_first_exam/tests/test_game_harbor.py
+  collab-overcooked:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/checkout@v4
+        with:
+          repository: YusaeMeow/Collab-Overcooked
+          ref: d7ae1aa5e63d8ec076e96ee437fcbbd095278ef4
+          path: .local/reference
+          persist-credentials: false
+      - run: python -m pip install -e .
+      - run: harbor run --game-suite collab-overcooked --offline-smoke --job-name collab-smoke -y
+      - run: python ci_checks/check-collab-overcooked.py jobs/collab-smoke .local/reference
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: collab-overcooked-harbor
+          path: jobs/
+          retention-days: 7
   fresh-clone-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -99,7 +122,7 @@ jobs:
           path: jobs/
           retention-days: 7
   invariants:
-    needs: [static, adapters, harbor, fresh-clone-smoke]
+    needs: [static, adapters, harbor, fresh-clone-smoke, collab-overcooked]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -108,4 +131,5 @@ jobs:
           ADAPTERS: ${{ needs.adapters.result }}
           HARBOR: ${{ needs.harbor.result }}
           SMOKE: ${{ needs.fresh-clone-smoke.result }}
-        run: test "$STATIC" = success && test "$ADAPTERS" = success && test "$HARBOR" = success && test "$SMOKE" = success
+          COLLAB: ${{ needs.collab-overcooked.result }}
+        run: test "$STATIC" = success && test "$ADAPTERS" = success && test "$HARBOR" = success && test "$SMOKE" = success && test "$COLLAB" = success
