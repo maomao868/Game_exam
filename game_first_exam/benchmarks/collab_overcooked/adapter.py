@@ -41,9 +41,13 @@ def episode():
         options.pop("map", None)
         data = call(planner.name, {"op": "plan", "head": planner.instruction_head_list,
                     "user": planner.current_user_message, "options": options})
-        response, tokens = data
+        response, tokens, updated = data
         if not isinstance(response, str) or type(tokens) is not int or tokens < 0:
             raise ValueError("Invalid role response")
+        if updated is not None:
+            if not isinstance(updated, str) or not planner.current_user_message["content"].startswith(updated):
+                raise ValueError("Invalid retry context")
+            planner.current_user_message["content"] = updated
         return response, tokens
 
     # Upstream compares two spoken lines only while this role answers a teammate.
@@ -54,8 +58,12 @@ def episode():
             if type(result) is not bool:
                 raise ValueError("Invalid similarity result")
             return result
+        previous = collab.if_two_sentence_similar_meaning
         collab.if_two_sentence_similar_meaning = similar
-        return original_answer(agent, *args, **kwargs)
+        try:
+            return original_answer(agent, *args, **kwargs)
+        finally:
+            collab.if_two_sentence_similar_meaning = previous
 
     modules.Module.query = query
     collab.LLMAgents.answer = answer

@@ -11,6 +11,31 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def check_live_isolation(catalog):
+    import yaml
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from collab_overcooked import prepare
+
+    images = {"sim": "sim", "role": "role", "grader": "grader"}
+    with tempfile.TemporaryDirectory() as tmp:
+        dest = Path(tmp)
+        source = ROOT / "game_first_exam/benchmarks/collab_overcooked"
+        prepare(source, dest, ["boiled_egg"], catalog, "gpt-4o", False, images)
+        task = dest / "collab-boiled-egg"
+        config = yaml.safe_load((task / "environment/docker-compose.yaml").read_text())
+        services = config["services"]
+        for role in ("chef", "assistant"):
+            assert services[role]["volumes"] == [role + ":/role:ro"]
+            assert services[role]["secrets"] == ["model_key"]
+            assert services[role]["read_only"] and services[role]["cap_drop"] == ["ALL"]
+            assert "COLLAB_PROBE" not in services[role]["environment"]
+        assert not set(services["chef"]["networks"]).intersection(services["assistant"]["networks"])
+        assert all(services[name]["network_mode"] == "none" and "secrets" not in services[name]
+                   for name in ("sim", "main"))
+        assert int(services["sim"]["environment"]["REPEATS"]) == 10
+        assert (task / "solution/solve.sh").stat().st_mode & 0o001
+
+
 def main(job, upstream):
     catalog = tomllib.loads((ROOT / "configs/native_benchmarks/collab-overcooked.toml").read_text())
     head = subprocess.check_output(["git", "-C", upstream, "rev-parse", "HEAD"], text=True).strip()
@@ -20,6 +45,7 @@ def main(job, upstream):
               if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
               and node.targets[0].id.startswith("level_")}
     assert levels == catalog["levels"]
+    check_live_isolation(catalog)
     [trial_result] = job.glob("*/result.json")
     trial = trial_result.parent
     result = json.loads(trial_result.read_text())
@@ -53,15 +79,13 @@ def main(job, upstream):
                                           "sha256sum", *files], text=True).splitlines()
         for line, path in zip(hashes, files.values(), strict=True):
             assert line.split()[0] == hashlib.sha256((upstream / path).read_bytes()).hexdigest(), path
-    with tempfile.TemporaryDirectory() as tmp:
-        dest = Path(tmp)
-        dest.chmod(0o777)
-        subprocess.run(["docker", "run", "--rm", "--network", "none", "-v", f"{dest}:/golden",
-                        "-v", f"{ROOT}/game_first_exam/tests/collab_native_probe.py:/integration/direct.py:ro",
-                        "-v", f"{ROOT}/game_first_exam/benchmarks/collab_overcooked/fixture_policy.py:/integration/fixture_policy.py:ro",
-                        sim, "python", "/integration/direct.py", "/golden"], check=True, stdout=subprocess.DEVNULL)
-        [direct] = dest.rglob("experiment_*.json")
-        assert json.loads(evaluated.read_text()) == json.loads(direct.read_text()), "Native trajectories differ"
+    direct = subprocess.check_output([
+        "docker", "run", "--rm", "--network", "none",
+        "-v", f"{ROOT}/game_first_exam/tests/collab_native_probe.py:/integration/direct.py:ro",
+        "-v", f"{ROOT}/game_first_exam/benchmarks/collab_overcooked/fixture_policy.py:/integration/fixture_policy.py:ro",
+        sim, "sh", "-ec", "python /integration/direct.py /tmp/golden >&2 && cat /tmp/golden/*/*/experiment_*.json",
+    ])
+    assert json.loads(evaluated.read_text()) == json.loads(direct), "Native trajectories differ"
     print("PASS: sealed Harbor trajectory matches direct native run; SR=PC=IC=RC=1")
 
 

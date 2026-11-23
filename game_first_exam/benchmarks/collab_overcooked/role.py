@@ -50,13 +50,15 @@ def main():
                     elif item["op"] == "plan":
                         planner = modules.Module(item["head"], model=model, model_dirname="",
                                                 local_server_api=os.getenv("OPENAI_BASE_URL"), K=0)
-                        planner.current_user_message = item["user"]
+                        planner.current_user_message = item["user"].copy()
                         if probe:
-                            value = choose(role, planner.query_messages(False))
+                            response, tokens = choose(role, planner.query_messages(False))
                         else:
-                            value = planner.query(key="", proxy="", **item["options"])
-                            if not value[0]:
-                                raise ValueError("Upstream returned an empty model response")
+                            response, tokens = planner.query(key="", proxy="", **item["options"])
+                        # Native retries may shorten the current message before
+                        # returning an empty answer to the controller for correction.
+                        current = planner.current_user_message["content"]
+                        value = [response, tokens, current if current != item["user"]["content"] else None]
                     else:
                         raise ValueError("Unknown role request")
                 except Exception as exc:
